@@ -30,7 +30,7 @@ class FixedExample():#threading.Thread):
         self.window.fullscreen()
         self.window.show()
 
-    def daten_ausgabe(self, button, value, v2,box):
+    def daten_ausgabe(self, button, value, v2,box,ii):
         
 
         if self.firsttimeclicked == 0:
@@ -47,6 +47,15 @@ class FixedExample():#threading.Thread):
             res2 = requests.get("https://mete.piratenfraktion-nrw.de/drinks.json")   #resources drinks
             data2= res2.json()
 
+            res =requests.get("https://mete.piratenfraktion-nrw.de/users.json")   #resources : users
+            data = res.json()
+
+            o  = str(data[ii]['balance'])
+            bal = Gtk.Label('balance: '+o+'€')
+            f.add(bal)
+            bal.show()
+            f.move(bal,43,180)
+
             #Creating drinks.buttons            
             i=0
             for x in range(0,6,1):
@@ -56,6 +65,9 @@ class FixedExample():#threading.Thread):
                     
 
                     l  = str(data2[i]['logo_url'])                    
+                    m  = str(data2[i]['price'])
+                    n  = str(data2[i]['name'])
+#                    o  = str(data[ii]['balance'])                   
 
                     fix= Gtk.Fixed()
                     fix.show()
@@ -78,7 +90,16 @@ class FixedExample():#threading.Thread):
                     
                     self.fixed.move(fix,330+200*y,370+200*x)
                     
-                    i+=1
+                    
+                    name = Gtk.Label(n)
+                    vbox.add(name)
+                    name.show()
+
+                    price = Gtk.Label(m+"€")
+                    vbox.add(price)
+                    price.show()
+
+
 
                     url = ("https://mete.piratenfraktion-nrw.de/" + l)
                                                                      
@@ -91,6 +112,12 @@ class FixedExample():#threading.Thread):
                     image = Gtk.Image().new_from_pixbuf(pixbuf)                                                                                                                               
                     button.add(image)
                     image.show_all()               
+
+
+
+
+                    i += 1
+
                 
     def daten_ausgabe2(self,button):
         pass               
@@ -129,7 +156,7 @@ class FixedExample():#threading.Thread):
 
                 button.show()
                 vbox.pack_start(button, True, True, 0)
-                button.connect("clicked", self.daten_ausgabe, data[i], self.id[i],self.boxes[i])
+                button.connect("clicked", self.daten_ausgabe, data[i], self.id[i],self.boxes[i],i)
 
 
 
