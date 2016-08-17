@@ -34,15 +34,19 @@ class FixedExample():#threading.Thread):
 
         self.window.show()
 
-    def daten_ausgabe(self, button, value, v2,box,ii):
+    def daten_ausgabe(self, button, value, button_name,box,ii):
         
         
         if self.firsttimeclicked == 0:
             
+            users = self.get_users()
+            o  = str(users[ii]['balance'])
+
+
             self.buttons= []            
 
             self.firsttimeclicked = 1
-            print(value['name'], v2)         
+            print(value['name'], "  balance:  "+o+"€")         
             for j in range(0, len(self.fixUsers)):
                 self.fixUsers[j].hide()
 
@@ -52,9 +56,6 @@ class FixedExample():#threading.Thread):
 
             drinks = self.get_drinks()
 
-            users = self.get_users()
-
-            o  = str(users[ii]['balance'])
             bal = Gtk.Label('balance: '+o+'€')
             f.add(bal)
             bal.show()
@@ -88,7 +89,6 @@ class FixedExample():#threading.Thread):
                     
                     button.show()
                     vbox.pack_start(button, True, True, 0)
-                    button.connect("clicked", self.daten_ausgabe2,i,bal,self.buttons[i],box)
                     
                     self.fixed.move(fix,330+200*y,370+200*x)
                     
@@ -100,6 +100,8 @@ class FixedExample():#threading.Thread):
                     label_price = Gtk.Label(drink_price + "€")
                     vbox.add(label_price)
                     label_price.show()
+                    button.connect("clicked", self.daten_ausgabe2,i,bal,self.buttons[i],box,drink_price)
+
 
                     response = requests.get(self.hostname + drink_logo_url, stream=True)                                                                                                                                 
                     with open('img.png', 'wb') as out_file:                                                                                                                                   
@@ -114,11 +116,15 @@ class FixedExample():#threading.Thread):
                     i += 1
 
             self.bal2 = bal
+        
+
+        
+
 
 
     def buy_drink(self, user_id, drink_id):
         res = requests.get("https://mete.piratenfraktion-nrw.de/users/"+str(user_id+1)+"/buy?drink="+str(drink_id+1))               
-        #print(res) # TODO: Schoen machen!!!
+        #print(res)!!
 
     def get_user_data(self, user_id):
         res = requests.get("https://mete.piratenfraktion-nrw.de/users/" + str(user_id+1)  + ".json")   #resources : users
@@ -133,7 +139,13 @@ class FixedExample():#threading.Thread):
         res = requests.get(self.hostname + "drinks.json")   #resources drinks
         return res.json()
     
-    def daten_ausgabe2(self,button,drink_id,bal,ibutton,user_id):
+    def Usershandler(self,button):
+        print("response")
+
+    def Drinkshandler(self,button):
+        print("response2")
+
+    def daten_ausgabe2(self,button,drink_id,bal,ibutton,user_id,drink_price):
 
 
         
@@ -141,19 +153,19 @@ class FixedExample():#threading.Thread):
 
 
         self.buy_drink(user_id, drink_id)
-        print("UserId: ",  str(user_id+1), "DrinkId: ", str(drink_id+1))                
+        print("UserId: ",  str(user_id+1), "purchase DrinkId: ", str(drink_id+1)+"  for:  ",str(drink_price)+"€")                
 
         data = self.get_user_data(user_id)
-        print(data['balance'])
+        print('balance: '+data['balance'])
 
         o  = str(data['balance'])
         
         bal = Gtk.Label('balance: '+o+'€')
         
         
-        self.fixUsers[ibutton].add(bal)
+        self.fixUsers[user_id].add(bal)
         bal.show()
-        self.fixUsers[ibutton].move(bal,43,180)
+        self.fixUsers[user_id].move(bal,43,180)
 
         #self.bal2.append(bal)
         self.bal2=bal
@@ -169,11 +181,13 @@ class FixedExample():#threading.Thread):
         buttonUsers.show()
         self.fixed.add(buttonUsers)
         self.fixed.move(buttonUsers, 100, 240)
+        buttonUsers.connect("clicked", self.Usershandler)
 
         buttonDrink = Gtk.Button(label="Drinks")
         buttonDrink.show()
         self.fixed.add(buttonDrink)
         self.fixed.move(buttonDrink, 100, 440)
+        buttonDrink.connect("clicked", self.Drinkshandler)
 
         for x in range(0, 5, 1):
             for y in range(0, 6, 1):
